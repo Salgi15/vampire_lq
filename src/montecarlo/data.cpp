@@ -49,6 +49,7 @@ namespace montecarlo{
       // MC Variables
       double delta_angle = 0.1;     // Tuned angle for Monte Carlo trial move
       double adaptive_sigma = 60.0; // sigma trial width for adaptive move
+      double spin_quantum_number = 1.0;
       std::vector<double> Sold(3);
       std::vector<double> Snew(3);
 

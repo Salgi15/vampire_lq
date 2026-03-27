@@ -285,7 +285,7 @@ void cmc_mc_step_mask(){
 			spin1_initial[2] = atoms::z_spin_array[atom1];
 
          // Make Monte Carlo move
-         montecarlo::internal::mc_move(spin1_initial, spin1_final);
+         montecarlo::internal::mc_move(atom1, spin1_initial, spin1_final);
 
 			// Calculate current energy
 			const double Eold = sim::calculate_spin_energy(atom1);
@@ -333,7 +333,7 @@ void cmc_mc_step_mask(){
 			spin1_init_mvd[2]=cmc::cmc_mask[mask1].ppolar_matrix[2][0]*spin1_initial[0]+cmc::cmc_mask[mask1].ppolar_matrix[2][1]*spin1_initial[1]+cmc::cmc_mask[mask1].ppolar_matrix[2][2]*spin1_initial[2];
 
 	      // Make Monte Carlo move
-	      montecarlo::internal::mc_move(spin1_initial, spin1_final);
+	      montecarlo::internal::mc_move(atom1, spin1_initial, spin1_final);
 
 			//spin1_fin_mvd = matmul(polar_matrix, spin1_final)
 			spin1_fin_mvd[0]=cmc::cmc_mask[mask1].ppolar_matrix[0][0]*spin1_final[0]+cmc::cmc_mask[mask1].ppolar_matrix[0][1]*spin1_final[1]+cmc::cmc_mask[mask1].ppolar_matrix[0][2]*spin1_final[2];

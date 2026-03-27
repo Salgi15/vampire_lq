@@ -72,7 +72,7 @@ namespace montecarlo{
    void monte_carlo_preconditioning();
 
 
-   enum algorithm_t { adaptive, spin_flip, uniform, angle, hinzke_nowak };
+   enum algorithm_t { adaptive, spin_flip, uniform, angle, hinzke_nowak, local_quantized };
 
    extern algorithm_t algorithm; // Selected algorithm for Monte Carlo simulations
 

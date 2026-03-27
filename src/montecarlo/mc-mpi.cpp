@@ -167,7 +167,7 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
       	internal::Sold[2] = z_spin_array[atom];
 
          // Make Monte Carlo move
-         internal::mc_move(internal::Sold, internal::Snew);
+         internal::mc_move(atom, internal::Sold, internal::Snew);
 
       	// Calculate current energy
       	Eold = sim::calculate_spin_energy(atom);
@@ -227,7 +227,7 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
    		internal::Sold[2] = z_spin_array[atom];
 
          // Make Monte Carlo move
-         internal::mc_move(internal::Sold, internal::Snew);
+         internal::mc_move(atom, internal::Sold, internal::Snew);
 
    		// Calculate current energy
    		Eold = sim::calculate_spin_energy(atom);

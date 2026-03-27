@@ -54,6 +54,7 @@ namespace montecarlo{
       //MC Variables
       extern double delta_angle;    // Tuned angle for Monte Carlo trial move
       extern double adaptive_sigma; // sigma trial width for adaptive move
+      extern double spin_quantum_number;
 
       extern std::vector<double> Sold;
       extern std::vector<double> Snew;
@@ -64,7 +65,7 @@ namespace montecarlo{
       //-------------------------------------------------------------------------
       // Internal function declarations
       //-------------------------------------------------------------------------
-      void mc_move(const std::vector<double>&, std::vector<double>&);
+      void mc_move(const int atom, const std::vector<double>&, std::vector<double>&);
 
    } // end of internal namespace
 

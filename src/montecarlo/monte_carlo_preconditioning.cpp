@@ -102,7 +102,7 @@ void monte_carlo_preconditioning(){
          //std::cout << "here0" << std::endl;
 
          // Make Monte Carlo move
-         montecarlo::internal::mc_move(internal::Sold, internal::Snew);
+         montecarlo::internal::mc_move(atom, internal::Sold, internal::Snew);
 
          //std::cout << "here" << std::endl;
 

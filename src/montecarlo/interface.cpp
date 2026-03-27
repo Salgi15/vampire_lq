@@ -12,6 +12,7 @@
 
 // C++ standard library headers
 #include <string>
+#include <cstdlib>
 
 // Vampire headers
 #include "montecarlo.hpp"
@@ -60,6 +61,11 @@ namespace montecarlo{
             algorithm = hinzke_nowak;
             return true;
          }
+         test = "local-quantized";
+         if( value == test ){
+            algorithm = local_quantized;
+            return true;
+         }
          else{
             terminaltextcolor(RED);
             std::cerr << "Error - value for \'montecarlo:" << word << "\' must be one of:" << std::endl;
@@ -68,6 +74,7 @@ namespace montecarlo{
             std::cerr << "\t\"uniform\"" << std::endl;
             std::cerr << "\t\"angle\"" << std::endl;
             std::cerr << "\t\"hinzke-nowak\"" << std::endl;
+            std::cerr << "\t\"local-quantized\"" << std::endl;
             terminaltextcolor(WHITE);
             err::vexit();
          }
@@ -76,6 +83,11 @@ namespace montecarlo{
       if( word == test ){
          // enable cmc with grain level rather than global constraints
          cmc::constrain_by_grain = true;
+         return true;
+      }
+      test = "spin-quantum-number";
+      if( word == test ){
+         internal::spin_quantum_number = atof(value.c_str());
          return true;
       }
 
