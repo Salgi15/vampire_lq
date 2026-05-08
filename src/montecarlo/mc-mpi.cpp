@@ -290,6 +290,44 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
    sim::mc_statistics_moves += global_statistics_moves;
    sim::mc_statistics_reject += global_statistics_reject;
 
+   #ifdef MPICF
+
+      if(internal::enable_collective_moves){
+
+         int do_collective = 0;
+
+         if(vmpi::my_rank == 0){
+
+            if(mtrandom::grnd() < internal::collective_move_probability){
+
+               do_collective = 1;
+
+            }
+
+         }
+
+         MPI_Bcast(&do_collective, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+         if(do_collective){
+
+            internal::mc_collective_rotation_parallel(
+
+               x_spin_array,
+
+               y_spin_array,
+
+               z_spin_array,
+
+               type_array
+
+            );
+
+         }
+
+      }
+
+   #endif
+
    return;
 
 }

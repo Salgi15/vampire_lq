@@ -62,6 +62,28 @@ namespace montecarlo{
       //MC-MPI variables
       extern std::vector<std::vector<int> > c_octants; //Core atoms of each octant
       extern std::vector<std::vector<int> > b_octants; //Boundary atoms of each octant
+
+      extern bool enable_collective_moves;
+
+      extern double collective_move_probability;
+
+      extern double collective_move_amplitude;
+
+      extern int collective_move_qmax;
+      extern long long collective_move_attempts;
+      extern long long collective_move_accepts;
+
+      void mc_collective_rotation_parallel(
+
+         std::vector<double>& x_spin_array,
+
+         std::vector<double>& y_spin_array,
+
+         std::vector<double>& z_spin_array,
+
+         std::vector<int>& type_array
+
+      );
       //-------------------------------------------------------------------------
       // Internal function declarations
       //-------------------------------------------------------------------------

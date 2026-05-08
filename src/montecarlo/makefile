@@ -9,6 +9,7 @@ initialize.o \
 interface.o \
 mc.o \
 mc_moves.o \
+collective_moves_mpi.o \
 cmc.o \
 masked_cmc_mc.o \
 cmc_mc.o \

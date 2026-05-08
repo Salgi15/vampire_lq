@@ -17,9 +17,9 @@
 # System Dimensions:
 #------------------------------------------
 dimensions:unit-cell-size = 3.524 !A
-dimensions:system-size-x = 4 !nm
-dimensions:system-size-y = 4 !nm
-dimensions:system-size-z = 4 !nm
+dimensions:system-size-x = 6 !nm
+dimensions:system-size-y = 6 !nm
+dimensions:system-size-z = 6 !nm
 
 #------------------------------------------
 # Material Files:
@@ -31,22 +31,36 @@ material:unit-cell-file = file.ucl
 # Simulation attributes:
 #------------------------------------------
 
-sim:minimum-temperature=0.2
-sim:maximum-temperature=1000
-sim:temperature-increment=25
-#sim:loop-time-steps= 10000
-sim:equilibration-time-steps= 100000
-sim:loop-time-steps= 1000
+#sim:minimum-temperature=0.2
+#sim:maximum-temperature=1000
+#sim:temperature-increment=25
+#sim:temperature = 25
+sim:loop-time-steps= 1000000
+sim:equilibration-time-steps= 1000000
+#sim:loop-time-steps= 1000
 sim:time-step=1.0E-16
 
 #------------------------------------------
 # Program and integrator details
 #------------------------------------------
-sim:program=curie-temperature
+#sim:program=curie-temperature
+#sim: program = time-series
 sim:integrator=monte-carlo
+sim:program=curie-temperature
+
+sim:minimum-temperature=25.2
+
+sim:maximum-temperature=125.2
+
+sim:temperature-increment=5
 
 montecarlo:algorithm = local-quantized
 montecarlo:spin-quantum-number = 1.0
+
+montecarlo:enable-collective-moves
+montecarlo:collective-move-probability = 0.005
+montecarlo:collective-move-amplitude = 0.01
+montecarlo:collective-move-qmax = 1
 
 #------------------------------------------
 # data output
@@ -56,3 +70,4 @@ output:temperature
 output:magnetisation
 output:magnetisation-length
 output:mean-magnetisation-length
+output:mean-specific-heat

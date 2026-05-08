@@ -57,6 +57,16 @@ namespace montecarlo{
       std::vector<std::vector<int> > c_octants; //Core atoms of each octant
       std::vector<std::vector<int> > b_octants; //Boundary atoms of each octant
 
+      bool enable_collective_moves = false;
+
+      double collective_move_probability = 0.01;
+
+      double collective_move_amplitude = 0.003;
+
+      int collective_move_qmax = 1;
+      long long collective_move_attempts = 0;
+      long long collective_move_accepts = 0;
+
 
    } // end of internal namespace
 

@@ -546,15 +546,36 @@ int run(){
    // Output Monte Carlo statistics if applicable
    //------------------------------------------------
    if(sim::integrator == sim::monte_carlo){
-      std::cout << "Monte Carlo statistics:" << std::endl;
-      std::cout << "\tTotal moves: " << long(sim::mc_statistics_moves) << std::endl;
-      std::cout << "\t" << ((sim::mc_statistics_moves - sim::mc_statistics_reject)/sim::mc_statistics_moves)*100.0 << "% Accepted" << std::endl;
-      std::cout << "\t" << (sim::mc_statistics_reject/sim::mc_statistics_moves)*100.0                              << "% Rejected" << std::endl;
-      zlog << zTs() << "Monte Carlo statistics:" << std::endl;
-      zlog << zTs() << "\tTotal moves: " << sim::mc_statistics_moves << std::endl;
-      zlog << zTs() << "\t" << ((sim::mc_statistics_moves - sim::mc_statistics_reject)/sim::mc_statistics_moves)*100.0 << "% Accepted" << std::endl;
-      zlog << zTs() << "\t" << (sim::mc_statistics_reject/sim::mc_statistics_moves)*100.0                              << "% Rejected" << std::endl;
-   }
+
+	std::cout << "Monte Carlo statistics:" << std::endl;
+	std::cout << "\tTotal moves: " << long(sim::mc_statistics_moves) << std::endl;
+	std::cout << "\t" << ((sim::mc_statistics_moves - sim::mc_statistics_reject)/sim::mc_statistics_moves)*100.0 << "% Accepted" << std::endl;
+	std::cout << "\t" << (sim::mc_statistics_reject/sim::mc_statistics_moves)*100.0 << "% Rejected" << std::endl;
+
+	zlog << zTs() << "Monte Carlo statistics:" << std::endl;
+	zlog << zTs() << "\tTotal moves: " << sim::mc_statistics_moves << std::endl;
+	zlog << zTs() << "\t" << ((sim::mc_statistics_moves - sim::mc_statistics_reject)/sim::mc_statistics_moves)*100.0 << "% Accepted" << std::endl;
+	zlog << zTs() << "\t" << (sim::mc_statistics_reject/sim::mc_statistics_moves)*100.0 << "% Rejected" << std::endl;
+
+	const long long collective_attempts = montecarlo::get_collective_attempts();
+	const long long collective_accepts  = montecarlo::get_collective_accepts();
+
+	if(collective_attempts > 0){
+
+		const double collective_acceptance =
+			100.0 * double(collective_accepts) / double(collective_attempts);
+
+		std::cout << "Collective MC statistics:" << std::endl;
+		std::cout << "\tAttempts: " << collective_attempts << std::endl;
+		std::cout << "\tAccepts: " << collective_accepts << std::endl;
+		std::cout << "\t" << collective_acceptance << "% Accepted" << std::endl;
+
+		zlog << zTs() << "Collective MC statistics:" << std::endl;
+		zlog << zTs() << "\tAttempts: " << collective_attempts << std::endl;
+		zlog << zTs() << "\tAccepts: " << collective_accepts << std::endl;
+		zlog << zTs() << "\t" << collective_acceptance << "% Accepted" << std::endl;
+	}
+	}
    if(sim::integrator == sim::cmc || sim::integrator == sim::hybrid_cmc){
       std::cout << "Constrained Monte Carlo statistics:" << std::endl;
       std::cout << "\tTotal moves: " << montecarlo::cmc::mc_total << std::endl;

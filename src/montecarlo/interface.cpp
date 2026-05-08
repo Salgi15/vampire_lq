@@ -91,6 +91,26 @@ namespace montecarlo{
          return true;
       }
 
+      if(word == "enable-collective-moves"){
+         montecarlo::internal::enable_collective_moves = true;
+         return true;
+      }
+
+      if(word == "collective-move-probability"){
+         montecarlo::internal::collective_move_probability = atof(value.c_str());
+         return true;
+      }
+
+      if(word == "collective-move-amplitude"){
+         montecarlo::internal::collective_move_amplitude = atof(value.c_str());
+         return true;
+      }
+
+      if(word == "collective-move-qmax"){
+         montecarlo::internal::collective_move_qmax = atoi(value.c_str());
+         return true;
+      }
+
       //--------------------------------------------------------------------
       // Keyword not found
       //--------------------------------------------------------------------
@@ -110,6 +130,18 @@ namespace montecarlo{
       // Keyword not found
       //--------------------------------------------------------------------
       return false;
+
+   }
+
+   long long get_collective_attempts(){
+
+      return internal::collective_move_attempts;
+
+   }
+
+   long long get_collective_accepts(){
+
+      return internal::collective_move_accepts;
 
    }
 
