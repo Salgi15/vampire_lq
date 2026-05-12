@@ -66,6 +66,11 @@ namespace montecarlo{
             algorithm = local_quantized;
             return true;
          }
+         test = "local-quantized-heat-bath";
+         if( value == test ){
+            algorithm = local_quantized_heat_bath;
+            return true;
+         }
          else{
             terminaltextcolor(RED);
             std::cerr << "Error - value for \'montecarlo:" << word << "\' must be one of:" << std::endl;

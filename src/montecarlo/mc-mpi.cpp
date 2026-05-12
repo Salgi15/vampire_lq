@@ -14,6 +14,8 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <iomanip>
 
 // Vampire Header files
 #include "errors.hpp"
@@ -176,6 +178,9 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
       	x_spin_array[atom] = internal::Snew[0];
       	y_spin_array[atom] = internal::Snew[1];
       	z_spin_array[atom] = internal::Snew[2];
+         if(montecarlo::algorithm == montecarlo::local_quantized_heat_bath){
+            continue;
+         }
 
       	// Calculate new energy
       	Enew = sim::calculate_spin_energy(atom);
@@ -236,6 +241,9 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
    		x_spin_array[atom] = internal::Snew[0];
    		y_spin_array[atom] = internal::Snew[1];
    		z_spin_array[atom] = internal::Snew[2];
+         if(montecarlo::algorithm == montecarlo::local_quantized_heat_bath){
+            continue;
+         }
 
    		// Calculate new energy
    		Enew = sim::calculate_spin_energy(atom);
@@ -327,6 +335,54 @@ void mc_step_parallel(std::vector<double> &x_spin_array,
       }
 
    #endif
+
+   static std::ofstream energy_file;
+
+   static bool energy_file_open = false;
+
+   static long long mc_sweep_counter = 0;
+
+   const long long save_every = 100;
+
+   if(mc_sweep_counter % save_every == 0){
+
+      double E_local = 0.0;
+
+      for(int i = 0; i < vmpi::num_core_atoms; ++i){
+
+         E_local += sim::calculate_spin_energy(i);
+
+      }
+
+      double E_global = 0.0;
+
+      MPI_Allreduce(&E_local, &E_global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+      if(vmpi::my_rank == 0){
+
+         if(!energy_file_open){
+
+            energy_file.open("mc_energy_trace.dat");
+
+            energy_file << "# sweep T E_global\n";
+
+            energy_file_open = true;
+
+         }
+
+         energy_file << mc_sweep_counter << " "
+
+                     << std::setprecision(16)
+
+                     << sim::temperature << " "
+
+                     << E_global << "\n";
+
+      }
+
+   }
+
+   mc_sweep_counter++;
 
    return;
 

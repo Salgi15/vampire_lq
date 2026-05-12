@@ -38,6 +38,7 @@ void mc_hinzke_nowak(const std::vector<double>&, std::vector<double>&);
 void mc_adaptive(const std::vector<double>&, std::vector<double>&);
 void mc_local_quantized(const int atom, const std::vector<double>&, std::vector<double>&);
 void local_quantized_field(const int atom, double& bx, double& by, double& bz);
+void mc_local_quantized_heat_bath(const int atom, const std::vector<double>& old_spin, std::vector<double>& new_spin);
 ///--------------------------------------------------------
 ///
 ///  Master function to call desired Monte Carlo move
@@ -68,6 +69,9 @@ void mc_move(const int atom, const std::vector<double>& old_spin, std::vector<do
          break;
       case montecarlo::local_quantized:
          mc_local_quantized(atom, old_spin, new_spin);
+         break;
+      case montecarlo::local_quantized_heat_bath:
+         mc_local_quantized_heat_bath(atom, old_spin, new_spin);
          break;
       default:
          mc_adaptive(old_spin, new_spin);
@@ -444,6 +448,173 @@ void mc_local_quantized(const int atom, const std::vector<double>& old_spin, std
    new_spin[0] *= r;
    new_spin[1] *= r;
    new_spin[2] *= r;
+
+   return;
+}
+
+void mc_local_quantized_heat_bath(
+   const int atom,
+   const std::vector<double>& old_spin,
+   std::vector<double>& new_spin
+){
+
+   (void)old_spin;
+
+   const double s = montecarlo::internal::spin_quantum_number;
+   const double eps = 1.0e-14;
+
+   if(s <= 0.0){
+      mc_uniform(new_spin);
+      return;
+   }
+
+   // ------------------------------------------------------------
+   // Compute local exchange field
+   // ------------------------------------------------------------
+   double bx = 0.0;
+   double by = 0.0;
+   double bz = 0.0;
+
+   local_quantized_field(atom, bx, by, bz);
+
+   const double bnorm = std::sqrt(bx*bx + by*by + bz*bz);
+
+   if(bnorm < eps){
+      mc_uniform(new_spin);
+      return;
+   }
+
+   const double ezx = bx / bnorm;
+   const double ezy = by / bnorm;
+   const double ezz = bz / bnorm;
+
+   // ------------------------------------------------------------
+   // Build local transverse basis
+   // ------------------------------------------------------------
+   double ax = 0.0;
+   double ay = 0.0;
+   double az = 1.0;
+
+   if(std::fabs(ezz) > 0.9){
+      ax = 1.0;
+      ay = 0.0;
+      az = 0.0;
+   }
+
+   double exx = ay*ezz - az*ezy;
+   double exy = az*ezx - ax*ezz;
+   double exz = ax*ezy - ay*ezx;
+
+   const double exnorm = std::sqrt(exx*exx + exy*exy + exz*exz);
+
+   if(exnorm < eps){
+      mc_uniform(new_spin);
+      return;
+   }
+
+   exx /= exnorm;
+   exy /= exnorm;
+   exz /= exnorm;
+
+   const double eyx = ezy*exz - ezz*exy;
+   const double eyy = ezz*exx - ezx*exz;
+   const double eyz = ezx*exy - ezy*exx;
+
+   // ------------------------------------------------------------
+   // Effective inverse temperature in VAMPIRE MC convention
+   //
+   // Existing MC accepts with:
+   // exp(-DE * rescaled_material_kBTBohr)
+   //
+   // Here bnorm has same energy convention as calculate_spin_energy,
+   // so use local beta_eff = mu_s/muB * kBTBohr.
+   // ------------------------------------------------------------
+   const int imaterial = atoms::type_array[atom];
+
+   const double alpha = montecarlo::internal::temperature_rescaling_alpha[imaterial];
+   const double Tc    = montecarlo::internal::temperature_rescaling_Tc[imaterial];
+
+   const double rescaled_temperature =
+      sim::temperature < Tc
+      ? Tc * std::pow(sim::temperature / Tc, alpha)
+      : sim::temperature;
+
+   const double kBTBohr =
+      9.27400915e-24 / (rescaled_temperature * 1.3806503e-23);
+
+   const double beta_eff =
+      montecarlo::internal::mu_s_SI[imaterial] * 1.07828231e23 * kBTBohr;
+
+   // ------------------------------------------------------------
+   // Sample m from P(m) ∝ exp(beta_eff * bnorm * m)
+   // ------------------------------------------------------------
+   const int two_s = int(std::round(2.0 * s));
+   const int nlevels = two_s + 1;
+
+   std::vector<double> weights(nlevels, 0.0);
+
+   // stabilize exponent
+   double max_arg = -1.0e300;
+
+   for(int p = 0; p < nlevels; ++p){
+      const double m = -s + double(p);
+      const double arg = beta_eff * bnorm * m;
+      if(arg > max_arg) max_arg = arg;
+   }
+
+   double Z = 0.0;
+
+   for(int p = 0; p < nlevels; ++p){
+      const double m = -s + double(p);
+      const double arg = beta_eff * bnorm * m;
+      weights[p] = std::exp(arg - max_arg);
+      Z += weights[p];
+   }
+
+   double rnum = mtrandom::grnd() * Z;
+
+   int pick = nlevels - 1;
+   double cumulative = 0.0;
+
+   for(int p = 0; p < nlevels; ++p){
+      cumulative += weights[p];
+      if(rnum <= cumulative){
+         pick = p;
+         break;
+      }
+   }
+
+   const double ms = -s + double(pick);
+
+   double spar = ms / s;
+   if(spar > 1.0) spar = 1.0;
+   if(spar < -1.0) spar = -1.0;
+
+   const double sperp = std::sqrt(std::max(0.0, 1.0 - spar*spar));
+
+   const double phi = 2.0 * M_PI * mtrandom::grnd();
+
+   const double c = std::cos(phi);
+   const double sn = std::sin(phi);
+
+   new_spin[0] = spar*ezx + sperp*(c*exx + sn*eyx);
+   new_spin[1] = spar*ezy + sperp*(c*exy + sn*eyy);
+   new_spin[2] = spar*ezz + sperp*(c*exz + sn*eyz);
+
+   const double norm =
+      std::sqrt(new_spin[0]*new_spin[0]
+              + new_spin[1]*new_spin[1]
+              + new_spin[2]*new_spin[2]);
+
+   if(norm > 0.0){
+      const double inv = 1.0 / norm;
+      new_spin[0] *= inv;
+      new_spin[1] *= inv;
+      new_spin[2] *= inv;
+   }
+   else{
+      mc_uniform(new_spin);
+   }
 
    return;
 }
